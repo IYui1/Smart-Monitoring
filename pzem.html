@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard W.H.A.T</title>
+    <link rel="stylesheet" href="pzem.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">W.H.A.T</div>
+            <nav>
+                <ul class="menu">
+                    <li class="active"><i data-lucide="bar-chart-3"></i> Reports</li>
+                    <li><i data-lucide="zap"></i> Library</li>
+                    <li><i data-lucide="users"></i> People</li>
+                    <li><i data-lucide="check-square"></i> Activities</li>
+                </ul>
+                <div class="menu-label">Support</div>
+                <ul class="menu">
+                    <li><i data-lucide="lightbulb"></i> Get Started</li>
+                    <li><i data-lucide="settings"></i> Settings</li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h1>Reports & AI Analytics</h1>
+                <button class="btn-download" onclick="downloadReport()">
+                    <i data-lucide="download"></i>
+                    Download AI Report
+                </button>
+            </header>
+
+            <div class="filters">
+                <div class="filter-item">Timeframe: <strong>All-time</strong></div>
+                <div class="filter-item">System Status: <strong style="color: #22c55e;">Connected to Firebase AI</strong></div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="stats-grid">
+                    <div class="card stat">
+                        <p class="label">Estimated Active Device <i data-lucide="brain" size="12" style="color: var(--primary);"></i></p>
+                        <h3 id="active-device-val">0<span>/80</span></h3>
+                    </div>
+                    <div class="card stat">
+                        <p class="label">Energy Usage</p>
+                        <h3 id="energy-val">0<span> kWh</span></h3>
+                        <div class="mini-chart"></div>
+                    </div>
+                    <div class="card stat">
+                        <p class="label">Voltage Usage</p>
+                        <h3 id="voltage-val">0<span> V</span></h3>
+                        <div class="mini-chart"></div>
+                    </div>
+                    <div class="card stat">
+                        <p class="label">Power Usage</p>
+                        <h3 id="power-val">0<span> W</span></h3>
+                        <div class="mini-chart"></div>
+                    </div>
+                    <div class="card stat">
+                        <p class="label">Current Usage</p>
+                        <h3 id="current-val">0<span> A</span></h3>
+                        <div class="mini-chart"></div>
+                    </div>
+                    <!-- FITUR SUHU: Mengganti teks statis frekuensi menjadi pemantauan Suhu & Frekuensi -->
+                    <div class="card stat">
+                        <p class="label">System Freq & Temp</p>
+                        <h3 id="freq-val">0<span> Hz</span> / 0<span>°C</span></h3>
+                        <div class="mini-chart"></div>
+                    </div>
+                </div>
+
+                <div class="card activity-card">
+                    <div class="card-head">
+                        <p>Activity Graph</p>
+                        <select><option>Live</option></select>
+                    </div>
+                    <div style="height: 200px; width: 100%;">
+                        <canvas id="liveChart"></canvas> 
+                    </div>
+                </div>
+
+                <div class="card analysist-card">
+                    <p class="title"><i data-lucide="sparkles" style="color: #eab308; vertical-align: middle;"></i> AI Insights & Recommendation</p>
+                    <div class="analysist-content">
+                        <p id="ai-status">Menganalisis anomali data jaringan...</p>
+                        <ul class="ai-points" id="ai-insights-list"></ul>
+                    </div>
+                </div>
+
+                <div class="card list-card">
+                    <p class="title">Primary Detected Device (Highest Load)</p>
+                    <div class="item">
+                        <div class="img-box red-bg-icon"><i data-lucide="alert-triangle" style="color: #ef4444; margin: 10px;"></i></div>
+                        <div class="info">
+                            <div class="txt" id="weak-device-name">Mendeteksi... <span>0%</span></div>
+                            <div class="prog"><div class="fill red" id="weak-device-bar" style="width: 0%;"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card list-card">
+                    <p class="title">Load Efficiency Status (Power Factor)</p>
+                    <div class="item">
+                        <div class="img-box green-bg"><i data-lucide="check-circle" style="color: #22c55e; margin: 10px;"></i></div>
+                        <div class="info">
+                            <div class="txt" id="strong-device-name">Mendeteksi... <span>0%</span></div>
+                            <div class="prog"><div class="fill green" id="strong-device-bar" style="width: 0%;"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card cost-card">
+                    <p class="title">Biaya Terakumulasi</p>
+                    <div class="cost-content">
+                        <h2 id="biaya-val">Rp. 0</h2>
+                        <div class="indicators">
+                            <div class="ind" id="ind-status"><span class="line orange" id="ind-color"></span> Membaca Kondisi...</div>
+                        </div>
+                    </div>
+                    <p class="prediction" id="ai-cost-prediction">Prediksi Akhir Bulan: <strong>Menghitung...</strong></p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>lucide.createIcons();</script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Konfigurasi Firebase
+    const firebaseConfig = { databaseURL: "https://pzem-4ffd6-default-rtdb.firebaseio.com" };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Inisialisasi Grafik
+    const ctx = document.getElementById('liveChart').getContext('2d');
+    const liveChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Power (W)',
+                data: [],
+                borderColor: '#4f46e5',
+                tension: 0.4,
+                fill: true,
+                backgroundColor: 'rgba(79, 70, 229, 0.1)'
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // HISTORY STORAGE
+    let powerHistory = [];
+    let previousPower = 0;
+
+    // MASTER DATABASE BEBAN PERANGKAT TUNGGAL
+    const deviceDatabase = [
+        { name: "Smartphone Charger", minPower: 1, maxPower: 20, minPF: 0.1, maxPF: 0.6, category: "Charging" },
+        { name: "LED Lamp", minPower: 5, maxPower: 45, minPF: 0.2, maxPF: 0.7, category: "Lighting" },
+        { name: "Electric Fan", minPower: 35, maxPower: 90, minPF: 0.55, maxPF: 0.85, category: "Motor Load" },
+        { name: "Laptop / Monitor", minPower: 40, maxPower: 125, minPF: 0.85, maxPF: 1.0, category: "Computing" },
+        { name: "Gaming PC", minPower: 126, maxPower: 500, minPF: 0.85, maxPF: 1.0, category: "High Computing" },
+        { name: "Pump / AC", minPower: 250, maxPower: 2200, minPF: 0.5, maxPF: 0.95, category: "Heavy Inductive" }
+    ];
+
+    // ======================================================
+    // CORE ENGINE: ANALISIS MULTI-DEVICE & BEBAN BARU
+    // ======================================================
+    function analyzeHardwareEnvironment(data) {
+        let p = Number(data.power) || 0;
+        let v = Number(data.voltage) || 0;
+        let c = Number(data.current) || 0;
+        let pf = Number(data.pf) || 0;
+        let freq = Number(data.frequency) || 0;
+        let temp = Number(data.suhu) || 0;
+        let energy = Number(data.energy) || 0;
+        let biaya = Number(data.biaya) || 0;
+
+        let deltaPower = p - previousPower;
+        previousPower = p;
+
+        powerHistory.push(p);
+        if (powerHistory.length > 50) powerHistory.shift();
+
+        let estimatedDevices = [];
+        let remainingPower = p;
+        let confidenceScore = 0;
+        let mainDeviceName = "No Device Active";
+
+        // 1. ALGORITMA DEKOMPOSISI DAYA (Multi-device Greedy Matching)
+        if (p > 1) {
+            // Urutkan database dari beban terbesar ke terkecil untuk dekomposisi multi-device
+            let sortedDb = [...deviceDatabase].sort((a, b) => b.minPower - a.minPower);
+            
+            sortedDb.forEach(device => {
+                // Periksa jika sisa daya masih cukup untuk menampung batas minimal beban alat ini
+                if (remainingPower >= device.minPower) {
+                    // Berikan toleransi jika konsumsi gabungan sedikit melampaui maxPower tunggal
+                    let allocation = Math.min(remainingPower, device.maxPower);
+                    estimatedDevices.push(device.name);
+                    remainingPower -= allocation;
+                }
+            });
+
+            // 2. DETEKSI GABUNGAN BEBAN ATAU PERANGKAT BARU (Sisa Daya)
+            if (remainingPower > 8) { // Jika tersisa daya > 8 Watt tak dikenal
+                if (estimatedDevices.length > 0) {
+                    estimatedDevices.push(`Unknown Mixture (+${remainingPower.toFixed(1)}W)`);
+                    mainDeviceName = `${estimatedDevices[0]} + Combined Loads`;
+                    confidenceScore = 85; 
+                } else {
+                    estimatedDevices.push("New / Unidentified Device");
+                    mainDeviceName = "New Device Tracked";
+                    confidenceScore = 60; // Confidence rendah karena deviasi database
+                }
+            } else {
+                // Jika bersih terbagi habis/mendekati ke daftar perangkat
+                mainDeviceName = estimatedDevices[0] || "Unknown Load";
+                confidenceScore = Math.floor(80 + (pf * 19)); // Semakin tinggi PF, pembacaan PZEM semakin akurat
+            }
+        }
+
+        // ======================================================
+        // ATUR LOGIKA AI INSIGHTS & ANOMALI REAL-TIME
+        // ======================================================
+        let insights = [];
+
+        if (v < 205 || v > 240) insights.push("⚠️ Tegangan (Voltage) tidak stabil! Deteksi: " + v + "V");
+        if (pf < 0.5 && p > 40) insights.push("⚠️ Power Factor (pf) terlalu rendah. Pemborosan daya reaktif.");
+        if (deltaPower > 120) insights.push("⚠️ Lonjakan daya (Power Spike) mendadak terdeteksi sebesar +" + deltaPower.toFixed(1) + " W.");
+        if (freq < 48 || freq > 52) insights.push("⚠️ Anomali Frekuensi jala-jala listrik terdeteksi di luar batas standar 50Hz.");
+        
+        // INTEGRASI WARPING PARASIT FITUR SUHU hardware/enclosure pzem
+        if (temp > 55) {
+            insights.push("🔥 KONDISI KRITIS: Suhu perangkat keras terdeteksi overheat (" + temp + "°C)!");
+        } else if (temp > 42) {
+            insights.push("🌡️ Warning: Suhu operasional sistem menghangat (" + temp + "°C).");
+        }
+
+        if (insights.length === 0 && p > 0) {
+            insights.push("✅ Distribusi elektrikal dan parameter gelombang stabil.");
+        } else if (p === 0) {
+            insights.push("💤 Sistem dalam keadaan idle / tidak ada beban.");
+        }
+
+        // STATUS KLASIFIKASI PENGGUNAAN
+        let status = "Efficient";
+        if (p > 180) status = "Medium Usage";
+        if (p > 500) status = "High Usage";
+
+        // FIXING KEKELIRUAN BIAYA PREDIKSI: 
+        // Menggunakan asumsi jika biaya adalah nilai kumulatif berjalan dari kilowatt-hour (kWh)
+        let monthlyPrediction = p > 0 ? (biaya + (p * 0.001 * 1500 * 24 * 30)) : (biaya * 1.2); 
+        if (biaya === 0 && p > 0) monthlyPrediction = (p * 0.001 * 1500 * 720); // Fallback hitungan kasar jika rate kosong (tarif dasar Rp.1500/kWh)
+
+        // ======================================================
+        // RENDER DAN KONEKSI KE COMPONENT DASHBOARD
+        // ======================================================
+        document.getElementById('active-device-val').innerHTML = `${estimatedDevices.length}<span>/80</span>`;
+        document.getElementById('weak-device-name').innerHTML = `${mainDeviceName} <span>${p > 0 ? confidenceScore : 0}%</span>`;
+        document.getElementById('weak-device-bar').style.width = `${p > 0 ? confidenceScore : 0}%`;
+        
+        // Mengubah bar efisiensi representasi nilai asli dari Power Factor (%)
+        let pfPercentage = Math.floor(pf * 100);
+        document.getElementById('strong-device-name').innerHTML = `Faktor Daya Aktual <span>${pfPercentage}%</span>`;
+        document.getElementById('strong-device-bar').style.width = `${pfPercentage}%`;
+
+        // Update indikator Suhu dan Frekuensi gabungan di satu card box
+        document.getElementById('freq-val').innerHTML = `${freq}<span> Hz</span> / ${temp}<span>°C</span>`;
+
+        // Update AI status panel header
+        document.getElementById('ai-status').innerText = temp > 55 ? "Kondisi Sistem: Overheating!" : "W.H.A.T Hardware AI Monitoring Active";
+
+        // Cetak List Insight Kombinasi
+        const list = document.getElementById('ai-insights-list');
+        list.innerHTML = "";
+
+        insights.forEach(item => {
+            let li = document.createElement('li');
+            li.innerText = item;
+            list.appendChild(li);
+        });
+
+        // Tampilkan daftar rincian estimasi beban yang bekerja paralel
+        estimatedDevices.forEach(device => {
+            let li = document.createElement('li');
+            li.innerHTML = `🔌 <strong>Beban Aktif:</strong> ${device}`;
+            list.appendChild(li);
+        });
+
+        // Render hasil perhitungan biaya
+        document.getElementById('ai-cost-prediction').innerHTML = `Prediksi Tagihan Bulanan: <strong>Rp ${Math.round(monthlyPrediction).toLocaleString('id-ID')}</strong>`;
+
+        const indStatus = document.getElementById('ind-status');
+        if (status === "High Usage" || temp > 55) {
+            indStatus.innerHTML = '<span class="line red"></span> High Load / Warning';
+        } else if (status === "Medium Usage") {
+            indStatus.innerHTML = '<span class="line orange"></span> Medium Usage';
+        } else {
+            indStatus.innerHTML = '<span class="line green"></span> Energy Efficient';
+        }
+
+        // Simpan Log Globals untuk Fungsi Ekspor Data .TXT
+        window.latestAIReport = {
+            time: new Date().toLocaleString(),
+            voltage: v,
+            current: c,
+            power: p,
+            pf: pf,
+            frequency: freq,
+            temperature: temp,
+            estimatedDevices: estimatedDevices,
+            mainDevice: mainDeviceName,
+            confidence: confidenceScore,
+            insights: insights,
+            monthlyPrediction: monthlyPrediction
+        };
+    }
+
+    // ======================================================
+    // DOWNLOAD TEXT REPORT MANAGEMENT
+    // ======================================================
+    function downloadReport() {
+        if (!window.latestAIReport) {
+            alert("Data laporan AI belum siap atau Firebase belum terhubung.");
+            return;
+        }
+
+        const report = window.latestAIReport;
+        let text = `==================================================
+W.H.A.T AI ELECTRICAL & HARDWARE ANALYSIS REPORT
+==================================================
+Waktu Pembuatan : ${report.time}
+
+[METRIK ELEKTRIKAL TELEMETRI]
+Tegangan Listrik : ${report.voltage} V
+Arus Beban       : ${report.current} A
+Daya Aktif       : ${report.power} W
+Power Factor     : ${report.pf} (${Math.floor(report.pf * 100)}%)
+Frekuensi Jaringan: ${report.frequency} Hz
+Suhu Sensor PZEM : ${report.temperature} °C
+
+[HASIL DEKOMPOSISI BEBAN AI]
+Aparatus Dominan : ${report.mainDevice}
+Tingkat Akurasi  : ${report.confidence}%
+Daftar Perangkat Pararel Terdeteksi: 
+${report.estimatedDevices.map(d => "- " + d).join("\n")}
+
+[REKOMENDASI & INSIGHT SISTEM]
+${report.insights.join("\n") || "- Tidak ada anomali terdeteksi."}
+
+[PREDIKSI FINANSIAL]
+Estimasi Konsumsi Bulanan: Rp ${Math.round(report.monthlyPrediction).toLocaleString('id-ID')}
+
+==================================================
+Sistem Monitoring Energi W.H.A.T v2.0
+==================================================`;
+
+        const blob = new Blob([text], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `WHAT_AI_Report_${Date.now()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // ======================================================
+    // STREAM DATA FROM REAL-TIME FIREBASE DB
+    // ======================================================
+    database.ref('/').on('value', (snapshot) => {
+        const rawData = snapshot.val();
+        
+        if (rawData) {
+            // Konversi String dari Firebase RTDB secara eksplisit menjadi Float numeric
+            const data = {
+                voltage: parseFloat(rawData.voltage) || 0,
+                current: parseFloat(rawData.current) || 0,
+                power: parseFloat(rawData.power) || 0,
+                energy: parseFloat(rawData.energy) || 0,
+                frequency: parseFloat(rawData.frequency) || 0,
+                pf: parseFloat(rawData.pf) || 0,
+                biaya: parseFloat(rawData.biaya) || 0,
+                suhu: parseFloat(rawData.suhu) || 0 // Menerima payload suhu hardware jika dikirim mikrokontroler
+            };
+
+            // 1. Update Elemen Teks Utama Dashboard UI
+            document.getElementById('voltage-val').innerHTML = `${data.voltage}<span> V</span>`;
+            document.getElementById('current-val').innerHTML = `${data.current}<span> A</span>`;
+            document.getElementById('power-val').innerHTML = `${data.power}<span> W</span>`;
+            document.getElementById('energy-val').innerHTML = `${data.energy}<span> kWh</span>`;
+            document.getElementById('biaya-val').innerText = "Rp. " + data.biaya.toLocaleString('id-ID');
+
+            // 2. Jalankan Logika Komposisi Perangkat Baru & Analisis Suhu
+            analyzeHardwareEnvironment(data);
+
+            // 3. Update Grafik Real-time (Chart.js) Max 10 Nodes Windowing
+            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            if (liveChart.data.labels.length > 10) {
+                liveChart.data.labels.shift();
+                liveChart.data.datasets[0].data.shift();
+            }
+            
+            liveChart.data.labels.push(now);
+            liveChart.data.datasets[0].data.push(data.power);
+            liveChart.update();
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+:root {
+    --primary: #4f46e5;
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --text: #1e293b;
+    --muted: #94a3b8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+body { background: var(--bg); color: var(--text); }
+
+.container { display: flex; min-height: 100vh; }
+
+/* Sidebar */
+.sidebar { width: 250px; background: white; padding: 2rem; border-right: 1px solid #e2e8f0; }
+.logo { font-size: 1.5rem; font-weight: 800; margin-bottom: 2rem; letter-spacing: 1px; }
+.menu { list-style: none; margin-bottom: 2rem; }
+.menu li { 
+    display: flex; align-items: center; gap: 12px; padding: 12px; 
+    border-radius: 10px; cursor: pointer; color: var(--muted); transition: 0.2s;
+}
+.menu li.active { background: #eef2ff; color: var(--primary); font-weight: 600; }
+.menu-label { font-size: 11px; font-weight: 700; color: #cbd5e1; text-transform: uppercase; margin: 15px 0 5px 12px; }
+
+/* Main Layout */
+.main-content { flex: 1; padding: 2.5rem; max-width: 1300px; margin: 0 auto; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+.btn-download { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; border: 1px solid #e2e8f0; background: white; cursor: pointer; }
+
+.filters { display: flex; gap: 25px; margin-bottom: 2rem; font-size: 14px; }
+
+/* Grid System */
+.dashboard-grid { 
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 1.5rem; 
+}
+
+.stats-grid { 
+    grid-column: span 2; 
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 1rem; 
+}
+
+.card { 
+    background: var(--card-bg); 
+    padding: 1.5rem; 
+    border-radius: 20px; 
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+/* Stat Cards */
+.stat .label { font-size: 12px; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 4px;}
+.stat h3 { font-size: 1.8rem; }
+.stat h3 span { font-size: 1rem; color: #cbd5e1; }
+.mini-chart { height: 30px; border-bottom: 2px solid var(--primary); background: linear-gradient(0deg, #f5f3ff 0%, transparent 100%); margin-top: 10px; clip-path: polygon(0 100%, 20% 40%, 40% 80%, 60% 20%, 80% 60%, 100% 10%); }
+
+/* Activity Chart (Bagian yang Kamu Tanya) */
+.activity-card { grid-column: span 1; grid-row: span 2; display: flex; flex-direction: column; }
+.card-head { display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
+.bar-chart { 
+    display: flex; 
+    align-items: flex-end; 
+    justify-content: space-between; 
+    height: 100%; 
+    gap: 5px; 
+}
+.bar-col { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    height: 100%; 
+    justify-content: flex-end; 
+}
+.bar { 
+    width: 100%; 
+    background: var(--primary); 
+    border-radius: 4px; 
+    opacity: 0.8;
+}
+.bar-col p { 
+    margin-top: 10px; 
+    font-size: 10px; 
+    font-weight: 700; 
+    color: var(--muted); 
+}
+.analysist{
+    display: flex;
+}
+/* Device List */
+.title { font-weight: 700; margin-bottom: 1.5rem; }
+.item { display: flex; gap: 15px; margin-bottom: 1.2rem; align-items: center; }
+.img-box { width: 45px; height: 45px; background: #f1f5f9; border-radius: 12px; flex-shrink: 0; }
+.green-bg { background: #dcfce7; }
+.info { flex: 1; }
+.txt { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+.prog { height: 8px; background: #f1f5f9; border-radius: 10px; overflow: hidden; }
+.fill { height: 100%; }
+.red { background: #ef4444; } .pink { background: #f472b6; } .green { background: #22c55e; }
+
+/* Cost Card */
+.cost-content h2 { font-size: 1.8rem; margin: 1rem 0; }
+.indicators { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1rem; }
+.ind { font-size: 12px; display: flex; align-items: center; }
+.line { width: 4px; height: 16px; border-radius: 2px; margin-right: 8px; }
+.orange { background: #fb923c; }
+.prediction { font-size: 11px; color: var(--muted); border-top: 1px solid #f1f5f9; padding-top: 10px; }
+/* Penambahan Desain untuk Fitur Analisis AI & Kartu Baru */
+.analysist-card {
+    grid-column: span 1;
+    background: linear-gradient(135deg, #ffffff 0%, #fefce8 100%);
+    border: 1px solid #fef08a;
+    display: flex;
+    flex-direction: column;
+}
+
+.analysist-content {
+    font-size: 13px;
+    line-height: 1.6;
+    margin-top: 0.5rem;
+    color: #475569;
+}
+
+.ai-points {
+    margin-top: 10px;
+    padding-left: 15px;
+    font-weight: 500;
+}
+
+.ai-points li {
+    margin-bottom: 8px;
+    color: #1e293b;
+    list-style-type: square;
+}
+
+.red-bg-icon {
+    background: #fee2e2 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.green {
+    background: #22c55e !important;
+}
+
+.line.green {
+    background: #22c55e;
+}
